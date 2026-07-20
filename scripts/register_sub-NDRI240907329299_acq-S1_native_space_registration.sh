@@ -13,7 +13,7 @@ set -euo pipefail
 
 # Load SCT — source .bashrc so PATH picks up any node-local install
 # then fall back to SCT_DIR env var, then error out
-[ -f ~/.bashrc ] && source ~/.bashrc
+set +u; [ -f ~/.bashrc ] && source ~/.bashrc; set -u
 if [ -d "${SCT_DIR:-/tmp/sct_src}/bin" ]; then
     SCT_BIN="${SCT_DIR:-/tmp/sct_src}/bin"
     SCT_PY="${SCT_DIR:-/tmp/sct_src}/python/envs/venv_sct/bin/python"
