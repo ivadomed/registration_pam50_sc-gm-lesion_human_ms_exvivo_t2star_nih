@@ -11,8 +11,20 @@
 
 set -euo pipefail
 
-SCT_BIN="/tmp/sct_src/bin"
-SCT_PY="/tmp/sct_src/python/envs/venv_sct/bin/python"
+# Load SCT — source .bashrc so PATH picks up any node-local install
+# then fall back to SCT_DIR env var, then error out
+[ -f ~/.bashrc ] && source ~/.bashrc
+if [ -d "${SCT_DIR:-/tmp/sct_src}/bin" ]; then
+    SCT_BIN="${SCT_DIR:-/tmp/sct_src}/bin"
+    SCT_PY="${SCT_DIR:-/tmp/sct_src}/python/envs/venv_sct/bin/python"
+elif command -v sct_register_to_template &>/dev/null; then
+    SCT_BIN="$(dirname "$(which sct_register_to_template)")"
+    SCT_PY="${SCT_DIR}/python/envs/venv_sct/bin/python"
+else
+    echo "ERROR: SCT not found. Set SCT_DIR or install SCT to /tmp/sct_src." >&2
+    exit 1
+fi
+[ -f "${SCT_PY}" ] || SCT_PY="$(which python3)"
 export PATH="${SCT_BIN}:$PATH"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
