@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+sc_registration_output/
+wm_registration_output/
+wm_registration_output_correction_1/
+wm_registration_output_correction_2/
