@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Register sub-NDRI240907329299 acq-S1 (sacral, S2-S3) to PAM50 — correction 1
+# Register sub-NDRI240907329299 acq-S1 (sacral, S2-S3) to PAM50 — native space
 #
 # Segmentation source : combined_3d_pred_for_registration (separate SC/WM/GM/vertebrae)
 # Spinal anchors      : S2 + S3 from vertebrae prediction (PAM50 labels 26, 27)
-# Registration space  : PAM50 0.5mm (no -ref subject)
+# Registration space  : native 0.075mm (-ref subject; atlas output in chunk space)
 # Template seg used   : PAM50_wm (-s-template-id 4, present at S2-S3)
 # Z-flip              : affine-only correction (chunk mounted upside-down)
 #
-# Launch: set_slot 2-3 bash scripts/register_sub-NDRI240907329299_acq-S1_correction1.sh
+# Launch: set_slot 2-3 bash scripts/register_sub-NDRI240907329299_acq-S1_native_space_registration.sh
 
 set -euo pipefail
 
@@ -22,7 +22,7 @@ ACQ="S1"
 BASE="${SUBJ}_acq-${ACQ}_part-mag_T2star"
 
 DERIV="${PROJECT}/ms-exvivo-nih/derivatives/combined_3d_pred_for_registration/${SUBJ}/anat"
-OUT="${SCRIPT_DIR}/results/correction_1/${SUBJ}_acq-${ACQ}"
+OUT="${SCRIPT_DIR}/results/native_space_registration/${SUBJ}_acq-${ACQ}"
 
 mkdir -p "${OUT}"
 cd "${OUT}"
@@ -47,7 +47,8 @@ echo "=== Step 3: Build spinal level landmarks (S2 superior, S3 inferior) ==="
 "${SCT_PY}" "${SCRIPT_DIR}/build_landmarks_sacral.py" vertebrae_fixed.nii.gz _landmarks_S2_S3.nii.gz
 
 echo ""
-echo "=== Step 4: Register to PAM50 (PAM50 0.5mm space) ==="
+echo "=== Step 4: Register to PAM50 (native 0.075mm space) ==="
+# -ref subject : atlas output directly in chunk space at 0.075mm.
 # -c t2 : PAM50_t2s is empty at sacral; PAM50_t2 has full sacral content.
 # -s-template-id 4 : PAM50_wm present at S2-S3 (absent at S4-S5).
 # step=2 bsplinesyn: iter=20, smooth=0.5 for tight convergence at chunk borders.
@@ -57,6 +58,7 @@ sct_register_to_template \
     -lspinal _landmarks_S2_S3.nii.gz \
     -c       t2 \
     -s-template-id 4 \
+    -ref     subject \
     -param   step=0,type=label,dof=Tx_Ty_Tz_Sz:step=1,type=seg,algo=centermassrot,smooth=1,slicewise=1:step=2,type=seg,algo=bsplinesyn,iter=20,smooth=0.5,gradStep=0.5 \
     -qc      qc \
     -qc-subject "${SUBJ}_${ACQ}"
@@ -73,3 +75,6 @@ sct_warp_template \
 
 echo ""
 echo "=== Done: ${OUT} ==="
+echo "  Anatomical : img_fixed.nii.gz"
+echo "  Atlas      : label/atlas/PAM50_atlas_*.nii.gz"
+echo "  QC         : qc/index.html"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Register sub-PML014 acq-S0 (cervical, C1-C2) to PAM50 — correction 1
+# Register sub-PML014 acq-S0 (cervical, C1-C2) to PAM50 — PAM50 space
 #
 # Segmentation source : labels_ensemble (val 1|3=WM, 2|4=GM, >0=SC)
 # Spinal anchors      : C1 (superior) + C2 (inferior), manually confirmed
@@ -7,7 +7,7 @@
 # Template seg used   : PAM50_wm (-s-template-id 4)
 # Z-flip              : affine-only correction (chunk mounted upside-down)
 #
-# Launch: set_slot 2-3 bash scripts/register_sub-PML014_acq-S0_correction1.sh
+# Launch: set_slot 2-3 bash scripts/register_sub-PML014_acq-S0_pam50_space_registration.sh
 
 set -euo pipefail
 
@@ -22,7 +22,7 @@ ACQ="S0"
 
 ANAT="${PROJECT}/ms-exvivo-nih/${SUBJ}/anat/${SUBJ}_acq-${ACQ}_part-mag_T2star.nii.gz"
 SEG="${PROJECT}/outputs/final_predictions/labels_ensemble/${SUBJ}/anat/S0_68.4cm_T2s_75i_TR45TE9_cor_18avg_Redo_3200_seg.nii.gz"
-OUT="${SCRIPT_DIR}/results/correction_1/${SUBJ}_acq-${ACQ}"
+OUT="${SCRIPT_DIR}/results/pam50_space_registration/${SUBJ}_acq-${ACQ}"
 
 mkdir -p "${OUT}"
 cd "${OUT}"
